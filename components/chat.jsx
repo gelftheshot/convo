@@ -1,3 +1,7 @@
+import { MdOutlineSettingsVoice } from "react-icons/md";
+import { IoIosAttach } from "react-icons/io";
+import ChatForm from "./ChatForm";
+
 const Chat = () => {
   return (
     <div className=" text-white flex flex-col ">
@@ -5,7 +9,7 @@ const Chat = () => {
             first section
         </div>
         <footer className="bg-red-500 p-12">
-            second section
+            <ChatForm />
         </footer>
     </div>
   )
