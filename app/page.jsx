@@ -1,7 +1,8 @@
+import HomeComponent from "../components/homeComp";
 
 const HomePage = () => {
   return (
-    <div>HomePage mockup</div>
+    <HomeComponent />
   )
 }
 

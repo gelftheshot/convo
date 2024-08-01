@@ -1,7 +1,9 @@
-const sidebar = () => {
+const Sidebar = () => {
   return (
-    <div>sidebar</div>
+    <div className="bg-gray-800 text-white">
+      sidebar
+    </div>
   )
 }
 
-export default sidebar
+export default Sidebar
