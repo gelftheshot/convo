@@ -2,12 +2,14 @@
 import { useState, useRef, useEffect } from "react";
 import { MdOutlineSettingsVoice } from "react-icons/md";
 import { IoIosAttach } from "react-icons/io";
-import HandleSubmit from "./handlesubmit";
+import { useCompletion } from 'ai/react';
 
 const Chat = () => {
   const [message, setMessage] = useState("");
   const textareaRef = useRef(null);
-
+  const { completion, complete } = useCompletion({
+    api: '/api/completion',
+  });
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
@@ -19,12 +21,23 @@ const Chat = () => {
       textareaRef.current.style.borderRadius = borderRadius;
     }
   }, [message]);
+  
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    console.log("Submitted message:", message);
+    try {
+      await complete(message);
+    } catch (error) {
+      console.error("Error completing message:", error);
+    }
+  };
 
+  
   return (
     <div className="text-white flex flex-col h-screen">
       <div className="bg-slate-500 flex-1">
-        first section
+      {completion}
       </div>
       <footer className="bg-red-500 p-12">
         <form onSubmit={handleSubmit} className="max-w-3xl mx-auto">
