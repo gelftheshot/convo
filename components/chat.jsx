@@ -1,8 +1,8 @@
 "use client";
-
 import { useState, useRef, useEffect } from "react";
 import { MdOutlineSettingsVoice } from "react-icons/md";
 import { IoIosAttach } from "react-icons/io";
+import HandleSubmit from "./handlesubmit";
 
 const Chat = () => {
   const [message, setMessage] = useState("");
@@ -20,32 +20,6 @@ const Chat = () => {
     }
   }, [message]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    console.log("Submitted message:", message);
-    
-    try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ message }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log("Response:", data);
-
-    } catch (error) {
-      console.error("Error in API call:", error);
-    }
-
-    setMessage("");
-  };
 
   return (
     <div className="text-white flex flex-col h-screen">
