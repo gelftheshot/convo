@@ -1,24 +1,17 @@
 'use server';
+import { google } from '@ai-sdk/google';
+import { generateText } from 'ai';
 
-import { streamText } from 'ai';
-import { openai } from '@ai-sdk/openai';
-import { createStreamableValue } from 'ai/rsc';
 
-export async function generate(input) {
-  const stream = createStreamableValue('');
+export async function POST(req) {
+  const { message } = await req.json();
 
-  (async () => {
-    const { textStream } = await streamText({
-      model: openai('gpt-3.5-turbo'),
-      prompt: input,
-    });
+  const response = await generateText({
+    model: google('models/gemini-1.5-pro-latest'),
+    prompt: message,
+  });
 
-    for await (const delta of textStream) {
-      stream.update(delta);
-    }
-
-    stream.done();
-  })();
-
-  return { output: stream.value };
+  return new Response(JSON.stringify({ output: response.text }), {
+    headers: { 'Content-Type': 'application/json' },
+  });
 }
