@@ -2,14 +2,14 @@
 import { useState, useRef, useEffect } from "react";
 import { MdOutlineSettingsVoice } from "react-icons/md";
 import { IoIosAttach } from "react-icons/io";
-
+import { useCompletion } from 'ai/react';
 
 const Chat = () => {
   const [message, setMessage] = useState("");
-  const [generation, setGeneration] = useState('');
   const textareaRef = useRef(null);
-
-
+  const { completion, complete } = useCompletion({
+    api: '/api/completion',
+  });
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
@@ -22,31 +22,22 @@ const Chat = () => {
     }
   }, [message]);
   
-  useEffect(() =>{
-    
-  }, [generation]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Submitted message:", message);
-    async () => {
-      const { output } = await generate('Why is the sky blue?');
-
-      for await (const delta of readStreamableValue(output)) {
-        setGeneration(currentGeneration => `${currentGeneration}${delta}`);
-      }
+    try {
+      await complete(message);
+    } catch (error) {
+      console.error("Error completing message:", error);
     }
-    for await (const delta of readStreamableValue(output)) {
-      console.log(`Current generation: ${delta}`);
-    }
-    setMessage("");
   };
 
   
   return (
     <div className="text-white flex flex-col h-screen">
       <div className="bg-slate-500 flex-1">
-        {generation}
+      {completion}
       </div>
       <footer className="bg-red-500 p-12">
         <form onSubmit={handleSubmit} className="max-w-3xl mx-auto">
