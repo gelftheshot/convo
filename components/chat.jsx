@@ -1,5 +1,3 @@
-import { MdOutlineSettingsVoice } from "react-icons/md";
-import { IoIosAttach } from "react-icons/io";
 import ChatForm from "./ChatForm";
 
 const Chat = () => {
