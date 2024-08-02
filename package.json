@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ai-sdk/google": "^0.0.30",
+    "ai": "^3.2.45",
     "bcrypt": "^5.1.1",
     "next": "14.2.5",
     "next-auth": "^4.24.7",
