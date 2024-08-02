@@ -3,9 +3,12 @@ import { useState, useRef, useEffect } from "react";
 import { MdOutlineSettingsVoice } from "react-icons/md";
 import { IoIosAttach } from "react-icons/io";
 import { useCompletion } from 'ai/react';
+import { v4 as uuidv4 } from 'uuid';
+import Message from "./message";
 
 const Chat = () => {
   const [message, setMessage] = useState("");
+  const [newChatMessage, setNewChatMessage] = useState([]);
   const textareaRef = useRef(null);
   const { completion, complete } = useCompletion({
     api: '/api/completion',
@@ -15,7 +18,6 @@ const Chat = () => {
       textareaRef.current.style.height = "auto";
       const newHeight = Math.min(textareaRef.current.scrollHeight, 150); // Max height of 150px
       textareaRef.current.style.height = newHeight + "px";
-      
       // Adjust border radius based on height
       const borderRadius = newHeight > 40 ? "1rem" : "9999px";
       textareaRef.current.style.borderRadius = borderRadius;
@@ -25,7 +27,14 @@ const Chat = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Submitted message:", message);
+    setNewChatMessage((prev) => {
+      const newMessage = [...prev, {
+        _id: uuidv4(),
+        text: message,
+        role: "user"
+      }]
+      return newMessage;
+    })
     try {
       await complete(message);
     } catch (error) {
@@ -33,11 +42,15 @@ const Chat = () => {
     }
   };
 
-  
   return (
     <div className="text-white flex flex-col h-screen">
       <div className="bg-slate-500 flex-1">
-      {completion}
+      {newChatMessage.map(message => (
+        <Message key={message._id} role={message.role} content={message.text} />
+      ))} 
+      {!!completion && (
+        <Message role="assistant" content={completion} />
+      )}
       </div>
       <footer className="bg-red-500 p-12">
         <form onSubmit={handleSubmit} className="max-w-3xl mx-auto">
