@@ -1,15 +1,24 @@
-import { google } from '@ai-sdk/google';
+'use server';
 
-export const config = {
-  runtime: "edge",
-};
+import { streamText } from 'ai';
+import { openai } from '@ai-sdk/openai';
+import { createStreamableValue } from 'ai/rsc';
 
-const handler = async (req) => {
-    try {
-        const {message} = await req.json()
-    } catch (error) {
-        console.log("error occured", error)
+export async function generate(input) {
+  const stream = createStreamableValue('');
+
+  (async () => {
+    const { textStream } = await streamText({
+      model: openai('gpt-3.5-turbo'),
+      prompt: input,
+    });
+
+    for await (const delta of textStream) {
+      stream.update(delta);
     }
-};
 
-export { handler };
+    stream.done();
+  })();
+
+  return { output: stream.value };
+}
