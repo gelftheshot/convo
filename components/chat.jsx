@@ -2,11 +2,13 @@
 import { useState, useRef, useEffect } from "react";
 import { MdOutlineSettingsVoice } from "react-icons/md";
 import { IoIosAttach } from "react-icons/io";
-import HandleSubmit from "./handlesubmit";
+
 
 const Chat = () => {
   const [message, setMessage] = useState("");
+  const [generation, setGeneration] = useState('');
   const textareaRef = useRef(null);
+
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -19,12 +21,32 @@ const Chat = () => {
       textareaRef.current.style.borderRadius = borderRadius;
     }
   }, [message]);
+  
+  useEffect(() =>{
+    
+  }, [generation]);
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    console.log("Submitted message:", message);
+    async () => {
+      const { output } = await generate('Why is the sky blue?');
 
+      for await (const delta of readStreamableValue(output)) {
+        setGeneration(currentGeneration => `${currentGeneration}${delta}`);
+      }
+    }
+    for await (const delta of readStreamableValue(output)) {
+      console.log(`Current generation: ${delta}`);
+    }
+    setMessage("");
+  };
+
+  
   return (
     <div className="text-white flex flex-col h-screen">
       <div className="bg-slate-500 flex-1">
-        first section
+        {generation}
       </div>
       <footer className="bg-red-500 p-12">
         <form onSubmit={handleSubmit} className="max-w-3xl mx-auto">
