@@ -27,18 +27,31 @@ const Chat = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setNewChatMessage((prev) => {
-      const newMessage = [...prev, {
+    setNewChatMessage((prev) => [
+      ...prev,
+      {
         _id: uuidv4(),
         text: message,
         role: "user"
-      }]
-      return newMessage;
-    })
+      }
+    ]);
+    setMessage(""); // Clear the input after sending
+
     try {
-      await complete(message);
+      const response = await complete(message);
+      // We don't need to add the assistant's message here anymore
+      // as it will be streamed and displayed in real-time
     } catch (error) {
       console.error("Error completing message:", error);
+      // Optionally, you can add an error message to the chat
+      setNewChatMessage((prev) => [
+        ...prev,
+        {
+          _id: uuidv4(),
+          text: "An error occurred while processing your request.",
+          role: "assistant"
+        }
+      ]);
     }
   };
 
