@@ -6,45 +6,48 @@ import { useCompletion } from 'ai/react';
 import { v4 as uuidv4 } from 'uuid';
 import Message from "./message";
 
+
 const Chat = () => {
   const [message, setMessage] = useState("");
-  const [newChatMessage, setNewChatMessage] = useState([]);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [streamingMessage, setStreamingMessage] = useState(null);
   const textareaRef = useRef(null);
-  const { completion, complete } = useCompletion({
+  const chatWindowRef = useRef(null);
+  const { completion, complete, isLoading } = useCompletion({
     api: '/api/completion',
   });
+
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
-      const newHeight = Math.min(textareaRef.current.scrollHeight, 150); // Max height of 150px
+      const newHeight = Math.min(textareaRef.current.scrollHeight, 150);
       textareaRef.current.style.height = newHeight + "px";
-      // Adjust border radius based on height
       const borderRadius = newHeight > 40 ? "1rem" : "9999px";
       textareaRef.current.style.borderRadius = borderRadius;
     }
   }, [message]);
-  
+
+  useEffect(() => {
+    if (chatWindowRef.current) {
+      chatWindowRef.current.scrollTop = chatWindowRef.current.scrollHeight;
+    }
+  }, [chatMessages, streamingMessage]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setNewChatMessage((prev) => [
-      ...prev,
-      {
-        _id: uuidv4(),
-        text: message,
-        role: "user"
-      }
-    ]);
-    setMessage(""); // Clear the input after sending
+    if (!message.trim()) return;
+
+    const userMessage = { _id: uuidv4(), text: message, role: "user" };
+    setChatMessages((prev) => [...prev, userMessage]);
+    setMessage("");
+    setStreamingMessage({ _id: uuidv4(), text: "", role: "assistant" });
 
     try {
-      const response = await complete(message);
-      // We don't need to add the assistant's message here anymore
-      // as it will be streamed and displayed in real-time
+      await complete(message);
     } catch (error) {
       console.error("Error completing message:", error);
-      // Optionally, you can add an error message to the chat
-      setNewChatMessage((prev) => [
+      setStreamingMessage(null);
+      setChatMessages((prev) => [
         ...prev,
         {
           _id: uuidv4(),
@@ -55,40 +58,58 @@ const Chat = () => {
     }
   };
 
+  useEffect(() => {
+    if (completion) {
+      setStreamingMessage((prev) => 
+        prev ? { ...prev, text: completion } : null
+      );
+    }
+  }, [completion]);
+
+  useEffect(() => {
+    if (!isLoading && streamingMessage) {
+      setChatMessages((prev) => [...prev, streamingMessage]);
+      setStreamingMessage(null);
+    }
+  }, [isLoading, streamingMessage]);
   return (
-    <div className="text-white flex flex-col h-screen">
-      <div className="bg-slate-500 flex-1">
-      {newChatMessage.map(message => (
-        <Message key={message._id} role={message.role} content={message.text} />
-      ))} 
-      {!!completion && (
-        <Message role="assistant" content={completion} />
-      )}
-      </div>
-      <footer className="bg-red-500 p-12">
-        <form onSubmit={handleSubmit} className="max-w-3xl mx-auto">
-          <fieldset className="flex items-end">
-            <div className="relative flex-grow">
-              <textarea
-                ref={textareaRef}
-                className="w-full p-2 pr-24 text-black resize-none transition-all duration-200 ease-in-out"
-                style={{ maxHeight: "150px", overflowY: "auto" }}
-                rows="1"
-                placeholder="Type your message here"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-              ></textarea>
-              <div className="absolute right-2 bottom-2 flex items-center">
-                <button type="button" className="mr-2 text-gray-500 hover:text-gray-700">
-                  <IoIosAttach size={20} />
-                </button>
-                <button type="button" className="mr-2 text-gray-500 hover:text-gray-700">
-                  <MdOutlineSettingsVoice size={20} />
-                </button>
-                <button type="submit" className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm">Send</button>
-              </div>
+<div className="flex-1 flex flex-col bg-gray-100">
+  <div ref={chatWindowRef} className="flex-1 overflow-y-auto p-4 space-y-6">
+    {chatMessages.map(message => (
+      <Message key={message._id} role={message.role} content={message.text} />
+    ))}
+    {streamingMessage && (
+      <Message role={streamingMessage.role} content={streamingMessage.text || "Thinking..."} />
+    )}
+  </div>
+      <footer className="bg-white border-t border-gray-200 p-4">
+        <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
+          <div className="relative">
+            <textarea
+              ref={textareaRef}
+              className="w-full p-3 pr-24 text-gray-700 border border-gray-300 rounded-lg resize-none transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500"
+              style={{ maxHeight: "150px", minHeight: "50px", overflowY: "auto" }}
+              rows="1"
+              placeholder="Type your message here"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+            ></textarea>
+            <div className="absolute right-3 bottom-3 flex items-center space-x-2">
+              <button type="button" className="text-gray-500 hover:text-gray-700">
+                <IoIosAttach size={20} />
+              </button>
+              <button type="button" className="text-gray-500 hover:text-gray-700">
+                <MdOutlineSettingsVoice size={20} />
+              </button>
+              <button
+                type="submit"
+                className="bg-blue-500 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Sending...' : 'Send'}
+              </button>
             </div>
-          </fieldset>
+          </div>
         </form>
       </footer>
     </div>

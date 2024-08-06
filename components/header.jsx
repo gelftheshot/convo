@@ -6,28 +6,17 @@ import { RiChatNewFill } from "react-icons/ri";
 
 const Header = () => {
   return (
-    <header className='flex items-center h-12 px-2 mx-0 py-6 text-white md:px-4 bg-black drop-shadow-md'>
-        <div className="mr-auto">
-            <Link href='/'>
-                <Image src={logo} alt='logo' className='w-13 hover:cursor-pointer:scale-105' />
-            </Link>
-        </div>
-        <div className="flex items-center justify-center flex-grow">
-            <Link href='/'>
-            </Link>
-            <div>
-                <h1 className="text-lg font-bold">Title of the chat</h1>
-                <div className="flex justify-center">
-                    <span className="text-gray-500 text-sm">Model name</span>
-                </div>
-            </div>
-        </div>
-        <div>
-            <button className="flex items-center space-x-1 mr-4 text-blue-500 hover:text-blue-700">
-                <RiChatNewFill className="w-4 h-4" />
-                <span>New Chat</span>
-            </button>
-        </div>
+    <header className='flex items-center h-16 px-4 text-white bg-gray-900 w-full'>
+      <div className="flex items-center justify-between w-full max-w-screen-xl mx-auto">
+        <Link href='/'>
+          <Image src={logo} alt='logo' className='w-10 h-10 hover:opacity-80 transition-opacity' />
+        </Link>
+        <h1 className="text-xl font-bold">AI Chat Assistant</h1>
+        <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors">
+          <RiChatNewFill className="w-5 h-5" />
+          <span>New Chat</span>
+        </button>
+      </div>
     </header>
   )
 }

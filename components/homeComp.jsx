@@ -1,11 +1,15 @@
 import Chat from "./chat";
 import Sidebar from "./sidebar";
+import Header from "./header";
 
 const HomeComponent = () => {
   return (
-    <div className="grid h-screen grid-cols-[250px_1fr]">
+    <div className="flex flex-col h-screen">
+      <Header />
+      <div className="flex flex-1 overflow-hidden">
         <Sidebar />
         <Chat />
+      </div>
     </div>
   );
 };
