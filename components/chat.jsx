@@ -33,30 +33,6 @@ const Chat = () => {
     }
   }, [chatMessages, streamingMessage]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!message.trim()) return;
-
-    const userMessage = { _id: uuidv4(), text: message, role: "user" };
-    setChatMessages((prev) => [...prev, userMessage]);
-    setMessage("");
-    setStreamingMessage({ _id: uuidv4(), text: "", role: "assistant" });
-
-    try {
-      await complete(message);
-    } catch (error) {
-      console.error("Error completing message:", error);
-      setStreamingMessage(null);
-      setChatMessages((prev) => [
-        ...prev,
-        {
-          _id: uuidv4(),
-          text: "An error occurred while processing your request.",
-          role: "assistant"
-        }
-      ]);
-    }
-  };
 
   useEffect(() => {
     if (completion) {
